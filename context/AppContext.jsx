@@ -14,6 +14,14 @@ export const AppContextProvider = (props) => {
     const currency = process.env.NEXT_PUBLIC_CURRENCY
     const router = useRouter()
 
+    
+    // Fallback user object until Clerk is properly set up
+    const user = {
+        id: null,
+        email: null,
+        isSignedIn: false
+    }
+    
     const [products, setProducts] = useState([])
     const [userData, setUserData] = useState(false)
     const [isSeller, setIsSeller] = useState(true)
@@ -82,6 +90,7 @@ export const AppContextProvider = (props) => {
     }, [])
 
     const value = {
+        user,
         currency, router,
         isSeller, setIsSeller,
         userData, fetchUserData,
