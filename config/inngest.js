@@ -1,6 +1,7 @@
 import { Inngest } from "inngest";
 import connectDB from "./db";
 import User from "@/models/User";
+console.log("Received event from Clerk:", JSON.stringify(event, null, 2));
 
 export const inngest = new Inngest({ id : "g11-shop" });
 
