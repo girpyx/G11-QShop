@@ -2,15 +2,16 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
     _id: {
-        type: String,
+        type: String, // If using external auth provider's user ID, ensure all user creation provides this as a string
         required: [true, "User ID is required"],
-        unique: true,
+        unique: true, // Note: 'unique' is not a validator, just creates a unique index
     },
     name: {
         type: String,
         required: [true, "User name is required"],
         trim: true,
         maxlength: [100, "Name cannot be more than 100 characters"],
+        default: 'Unknown User', // Set default here for new users
     },
     email: {
         type: String,
@@ -44,19 +45,23 @@ const userSchema = new mongoose.Schema({
 
 // Add indexes for better performance
 userSchema.index({ email: 1 });
-userSchema.index({ _id: 1 });
+// userSchema.index({ _id: 1 }); // _id is indexed by default in MongoDB
 
 // Add pre-save middleware for validation
 userSchema.pre('save', function(next) {
-    if (!this.name || this.name.trim().length === 0) {
-        this.name = 'Unknown User';
+    try {
+        if (!this.name || this.name.trim().length === 0) {
+            this.name = 'Unknown User';
+        }
+        next();
+    } catch (err) {
+        next(err);
     }
-    next();
 });
 
-const User = mongoose.models.User || mongoose.model("User", userSchema);
+const User = mongoose.models.User || mongoose.model("User", userSchema)
 
-export default User;
+export default User
 
 
 
