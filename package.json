@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:flat": "eslint --config eslint.config.js ."
   },
   "dependencies": {
     "@clerk/nextjs": "^6.24.0",

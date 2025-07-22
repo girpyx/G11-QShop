@@ -1,10 +1,9 @@
-// eslint.config.mjs
+// eslint.config.js
 import { defineFlatConfig } from "eslint-define-config";
 import next from "eslint-config-next/core-web-vitals";
 
 export default defineFlatConfig([
   ...next,
-
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
     languageOptions: {
@@ -12,7 +11,6 @@ export default defineFlatConfig([
       sourceType: "module",
     },
     rules: {
-      // Add custom rules if needed
       "no-console": "warn",
       "semi": ["error", "always"],
     },
