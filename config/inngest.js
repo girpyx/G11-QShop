@@ -1,103 +1,53 @@
-import { Inngest } from "inngest";
+import { Inngest } from "inngest"
 import connectDB from "./db";
-import User from "@/models/User";
-console.log("Received event from Clerk:", JSON.stringify(event, null, 2));
+import { User } from "lucide-react";
 
-export const inngest = new Inngest({ id : "g11-shop" });
+// Create a client to send and receive events
+export const inngest = new Inngest({
+    id: "quickcart-next"});
 
-// Inngest function to save user data to a database
+// Inngest Function to save user data to mongoDB when a user is created in Clerk
 export const syncUserCreation = inngest.createFunction(
-    {
-        id : "sync-user-from-clerk",
-    },
-    { event : "clerk/user.created" },
-    async ({event, step}) => {
-        try {
-            const { id, first_name, last_name, email_addresses, image_url } = event.data.object;
-            
-            if (!id || !email_addresses || email_addresses.length === 0) {
-                throw new Error("Invalid user data received from Clerk");
-            }
-            
-            const userData = {
-                _id : id,
-                name : `${first_name || ''} ${last_name || ''}`.trim() || 'Unknown User',
-                email : email_addresses[0].email_address,
-                imageUrl : image_url || '',
-            }
-            
-            await step.run("connect-database", async () => {
-                await connectDB();
-            });
-            
-            await step.run("create-user", async () => {
-                await User.create(userData);
-            });
-        } catch (error) {
-            console.error("Error in syncUserCreation:", error);
-            throw error;
+    { id:'sync-user-from-clerk'},
+    { event: 'clerk/user.created'},
+    async ({ event }) => {
+        const {id, first_name, last_name, email_addresses, image_url } = event.data;
+        const userData = {
+            _id:id,
+            email: email_addresses[0].email_address,
+            name: first_name + ' ' + last_name,
+            imageurl: image_url
         }
+        await connectDB();
+        await User.create(userData)
+
     }
 )
 
+// Inngest function to update user data in mongoDB when a user is updated in Clerk
 export const syncUserUpdate = inngest.createFunction(
-    {
-        id : "sync-user-update-from-clerk",
-    },
-    { event : "clerk/user.updated" },
-    async ({event, step}) => {
-        try {
-            const { id, first_name, last_name, email_addresses, image_url } = event.data.object;
-            
-            if (!id || !email_addresses || email_addresses.length === 0) {
-                throw new Error("Invalid user data received from Clerk");
-            }
-            
-            const userData = {
-                name : `${first_name || ''} ${last_name || ''}`.trim() || 'Unknown User',
-                email : email_addresses[0].email_address,
-                imageUrl : image_url || '',
-            }
-            
-            await step.run("connect-database", async () => {
-                await connectDB();
-            });
-            
-            await step.run("update-user", async () => {
-                await User.findByIdAndUpdate(id, userData);
-            });
-        } catch (error) {
-            console.error("Error in syncUserUpdate:", error);
-            throw error;
+    {id: 'update-user-from-clerk'},
+    { event: 'clerk/user.updated'},
+    async ({ event }) => {
+        const {id, first_name, last_name, email_addresses, image_url } = event.data;
+        const userData = {
+            _id:id,
+            email: email_addresses[0].email_address,
+            name: first_name + ' ' + last_name,
+            imageurl: image_url
         }
+        await connectDB();
+        await User.findByIdAndUpdate(id,userData)
     }
 )
 
-// Inngest function to delete user from database
+//ingest function to delete user data in mongoDB when a user is deleted in Clerk
 export const syncUserDeletion = inngest.createFunction(
-    {
-        id : "sync-user-deletion-from-clerk",
-    },
-    { event : "clerk/user.deleted" },
-    async ({event, step}) => {
-        try {
-            const { id } = event.data.object;
-            
-            if (!id) {
-                throw new Error("Invalid user ID received from Clerk");
-            }
-            
-            await step.run("connect-database", async () => {
-                await connectDB();
-            });
-            
-            await step.run("delete-user", async () => {
-                await User.findByIdAndDelete(id);
-            });
-        } catch (error) {
-            console.error("Error in syncUserDeletion:", error);
-            throw error;
-        }
+    {id: 'delete-user-with-clerk'},
+    { event: 'clerk/user.deleted'},
+    async ({ event }) => {
+        const {id} = event.data;
+        await connectDB();
+        await User.findByIdAndDelete(id)
     }
 )
-

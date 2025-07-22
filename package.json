@@ -11,13 +11,15 @@
   "dependencies": {
     "@clerk/nextjs": "^6.24.0",
     "@headlessui/react": "^2.2.4",
+    "dotenv": "^17.2.0",
     "inngest": "^3.40.1",
     "lucide-react": "^0.525.0",
     "mongoose": "^8.16.3",
     "next": "^15.3.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-hot-toast": "^2.5.1"
+    "react-hot-toast": "^2.5.1",
+    "svix": "^1.69.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
