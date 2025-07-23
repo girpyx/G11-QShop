@@ -1,53 +1,62 @@
-import { Inngest } from "inngest"
+import { Inngest } from "inngest";
 import connectDB from "./db";
-import { User } from "lucide-react";
+import { User } from "lucide-react"; // Make sure this is your actual Mongoose model
 
-// Create a client to send and receive events
-export const inngest = new Inngest({
-    id: "quickcart-next"});
+// Initialize Inngest client
+export const inngest = new Inngest({ id: "quickcart-next" });
 
-// Inngest Function to save user data to mongoDB when a user is created in Clerk
+/**
+ * Sync user creation from Clerk to MongoDB
+ */
 export const syncUserCreation = inngest.createFunction(
-    { id:'sync-user-from-clerk'},
-    { event: 'clerk/user.created'},
-    async ({ event }) => {
-        const {id, first_name, last_name, email_addresses, image_url } = event.data;
-        const userData = {
-            _id:id,
-            email: email_addresses[0].email_address,
-            name: first_name + ' ' + last_name,
-            imageurl: image_url
-        }
-        await connectDB();
-        await User.create(userData)
+  { id: "quickcart-sync-user-creation-from-clerk" },
+  { event: "clerk/user.created" },
+  async ({ event }) => {
+    const { id, first_name, last_name, email_addresses, image_url } = event.data;
+    
+    const userData = {
+      _id: id,
+      email: email_addresses[0].email_address,
+      name: `${first_name} ${last_name}`,
+      imageurl: image_url,
+    };
 
-    }
-)
+    await connectDB();
+    await User.create(userData);
+  }
+);
 
-// Inngest function to update user data in mongoDB when a user is updated in Clerk
+/**
+ * Sync user update from Clerk to MongoDB
+ */
 export const syncUserUpdate = inngest.createFunction(
-    {id: 'update-user-from-clerk'},
-    { event: 'clerk/user.updated'},
-    async ({ event }) => {
-        const {id, first_name, last_name, email_addresses, image_url } = event.data;
-        const userData = {
-            _id:id,
-            email: email_addresses[0].email_address,
-            name: first_name + ' ' + last_name,
-            imageurl: image_url
-        }
-        await connectDB();
-        await User.findByIdAndUpdate(id,userData)
-    }
-)
+  { id: "quickcart-sync-user-update-from-clerk" },
+  { event: "clerk/user.updated" },
+  async ({ event }) => {
+    const { id, first_name, last_name, email_addresses, image_url } = event.data;
 
-//ingest function to delete user data in mongoDB when a user is deleted in Clerk
+    const userData = {
+      _id: id,
+      email: email_addresses[0].email_address,
+      name: `${first_name} ${last_name}`,
+      imageurl: image_url,
+    };
+
+    await connectDB();
+    await User.findByIdAndUpdate(id, userData);
+  }
+);
+
+/**
+ * Sync user deletion from Clerk to MongoDB
+ */
 export const syncUserDeletion = inngest.createFunction(
-    {id: 'delete-user-with-clerk'},
-    { event: 'clerk/user.deleted'},
-    async ({ event }) => {
-        const {id} = event.data;
-        await connectDB();
-        await User.findByIdAndDelete(id)
-    }
-)
+  { id: "g11-shop-sync-user-deletion-from-clerk" }, // MUST match Inngest log error
+  { event: "clerk/user.deleted" },
+  async ({ event }) => {
+    const { id } = event.data;
+
+    await connectDB();
+    await User.findByIdAndDelete(id);
+  }
+);
